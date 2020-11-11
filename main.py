@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 import requests
 link = 'https://www.wordreference.com/es/en/translation.asp?spen='
-old_verb = input("What is the verb? : ")
+old_word = input("What is the word? : ")
 infinitive = None
 def remove_before_char(s,c):
     #inputs a char to remove before (c, inclusive) on a string(s)
@@ -24,11 +24,19 @@ def remove_after_char(s,c):
         if (write==True):
             final = final +l
     return final    
-        
+
+def get_if_verb():
+    isVerb = True
+    #check under inflectionsection in html for "inflexiones"
+    return isVerb
+
+
+
 def get_infinitive():
     global infinitive
-    verb = old_verb
-    URL = link+verb
+    global old_word
+    word = old_word
+    URL = link+word
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
     results = soup.find(id="articleHead").find('div', class_='inflectionsSection')
