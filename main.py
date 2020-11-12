@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 link = 'https://www.wordreference.com/es/en/translation.asp?spen='
 old_word = input("What is the word? : ")
-infinitive = None
+
 def remove_before_char(s,c):
     #inputs a char to remove before (c, inclusive) on a string(s)
     final = ''
@@ -25,17 +25,8 @@ def remove_after_char(s,c):
             final = final +l
     return final    
 
-def get_if_verb():
-    isVerb = True
-    #check under inflectionsection in html for "inflexiones"
-    return isVerb
-
-
-
-def get_infinitive():
-    global infinitive
-    global old_word
-    word = old_word
+def get_infinitive(word):
+    
     URL = link+word
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
@@ -44,29 +35,63 @@ def get_infinitive():
     results=remove_after_char(results,'<')
     results.strip(' ')
     infinitive=results
+    
     return infinitive
   
+def get_if_verb(word):
+    # i = infinitive
+    # n = not verb
+    # v = verb
+    word = word.strip(' ')
+    #if word ends with r then infinitive verb
+    if (word[-1]=='r'):
+        return 'i'
+    try: 
+        v = get_infinitive(word)
+    except Exception as e: 
+        return 'n'
+    return 'v'
+    
 
-def get_translation():
 
-    if (infinitive==None):
-        return print('infinitive = null')
-    URL = link+infinitive
+
+
+
+def get_translation(word, isVerb):
+
+    URL = link+word
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
     results = soup.find(id="articleWRD").find('table', class_='WRD').find('tr', class_='even').find('td', class_='ToWrd')
     results=remove_before_char(str(results), '>')
     results=remove_after_char(str(results), '<')
     results=results.strip(' ')
-    results = "to " + results
+    if isVerb: results = "to " + results
     return results
 
 
 
 
 
-print(get_infinitive())
-print(get_translation())
+wordType = get_if_verb(old_word)
+# i = infinitive
+# n = not verb
+# v = verb
+if (wordType=='v'):
+    infinitive = get_infinitive(old_word)
+    print(infinitive)
+    translation = get_translation(infinitive, True)
+    print(translation)
+if (wordType=='i'):
+    translation = get_translation(old_word, True)
+    print(old_word)
+    print(translation)
+if (wordType=='n'):
+    translation = get_translation(old_word, False)
+    print(old_word)
+    print(translation)
+
+
 
 
 
