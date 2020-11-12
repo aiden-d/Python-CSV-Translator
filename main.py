@@ -39,16 +39,16 @@ def get_infinitive():
     URL = link+word
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
-    results = soup.find(id="articleHead").find('div', class_='inflectionsSection')
-    results = results.find_all('a')[0]
-    results = str(results).strip('<a href="/es/en/translation.asp?spen=')
-    results = results.strip('</a>')
-    results = results.strip('>')
-    infinitive = remove_before_char(results, '>')
+    results = soup.find(id="articleHead").find('div', class_='inflectionsSection').find('div', attrs={'style': 'padding-left:0px; cursor:pointer;', 'onclick':'redirectWR(event,"WResen")'}).find('dl', attrs={'style':'margin:12px 0px 6px;'}).find('dt')
+    results = remove_before_char(remove_before_char(remove_before_char(str(results),'>'),'>'),'>')
+    results=remove_after_char(results,'<')
+    results.strip(' ')
+    infinitive=results
     return infinitive
   
 
 def get_translation():
+
     if (infinitive==None):
         return print('infinitive = null')
     URL = link+infinitive
@@ -63,10 +63,7 @@ def get_translation():
 
 
 
-#infinitive = get_infinitive()
-#verb = infinitive
-#URL = 'https://www.wordreference.com/es/en/translation.asp?spen=' + verb
-#page = requests.get(URL)
+
 
 print(get_infinitive())
 print(get_translation())
