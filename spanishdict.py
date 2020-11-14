@@ -1,3 +1,4 @@
+from os import error
 from bs4 import BeautifulSoup
 import requests
 link = 'https://www.spanishdict.com/translate/'
@@ -26,11 +27,14 @@ def remove_after_char(s,c):
 
 def get_infinitive(soup):
     
-    
-    results = soup.find(id="headword-es")
-    results = remove_before_char(remove_before_char(str(results),'>'),'>')
-    results=remove_after_char(results,'<')
-   # results.strip(' ')
+    try:
+        results = soup.find(id="headword-es")
+        results = remove_before_char(remove_before_char(str(results),'>'),'>')
+        results=remove_after_char(results,'<')
+    # results.strip(' ')
+    except error as e:
+        print(e)
+        return None
     infinitive=results
     
     return infinitive
@@ -40,29 +44,50 @@ def get_infinitive(soup):
 
 
 def get_translation(soup):
-    results = soup.find(id="dictionary-neodict-es").find('div', class_='_1IN7ttrU').find('a', class_='_1UD6CASd')#.find('td', class_='ToWrd')
-    results=remove_before_char(str(results), '>')
-    results=remove_after_char(str(results), '<')
-   
+    try:
+        results = soup.find(id="dictionary-neodict-es").find('div', class_='_1IN7ttrU').find('a', class_='_1UD6CASd')#.find('td', class_='ToWrd')
+        results=remove_before_char(str(results), '>')
+        results=remove_after_char(str(results), '<')
+    except error as e:
+        print (e)
+        return None
     return results
 
 
-with open('translation.csv', mode='w', newline='') as translation_file:
-    translation_writer = csv.writer(translation_file)#translation_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL
-    with open("input.txt", "r") as a_file:
-        for line in a_file:
-            stripped_line = line.strip()
-            URL = link+line+'?langFrom=es'
-            page = requests.get(URL)
-            soup = BeautifulSoup(page.content, 'html.parser')
-            infinitive = get_infinitive(soup)
-            translation =  get_translation(soup)
-            translation_writer.writerow([translation,infinitive])
 
-            print(infinitive)
-            print(translation)
-            print("")
-           
+
+
+spanish_words = []
+
+with open('translation.csv', mode='w', newline='') as translation_file:
+    translation_writer = csv.writer(translation_file)
+    with open('input.txt', mode='r', newline='') as input:
+        for w in input:
+                try: 
+                    stripped_line = w.strip()
+                    URL = link+w+'?langFrom=es'
+                    page = requests.get(URL)
+                    soup = BeautifulSoup(page.content, 'html.parser')
+                    spanish_word = get_infinitive(soup)
+                    translation =  get_translation(soup)
+                    toWrite = True
+                except error as e:
+                    print(e)
+                with open('all_translations.txt', mode='r', newline='') as all_translations_file:
+                    for l in all_translations_file:
+                        if l.strip() == spanish_word.strip():
+                            toWrite=False
+                if toWrite and spanish_word != None and translation != None:
+                    spanish_words.append(spanish_word)
+                    translation_writer.writerow([translation,spanish_word])
+                    print(spanish_word)
+                    print(translation)
+                    print("")
+                else: print("already translated")
+with open('all_translations.txt', mode='a', newline='') as all_translations_file:
+    for s in spanish_words:
+        all_translations_file.write(s+'\n')
+
 print("Translation finished")
 
 
