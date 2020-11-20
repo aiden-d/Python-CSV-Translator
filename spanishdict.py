@@ -57,11 +57,11 @@ def get_translation(soup):
 
 
 
-spanish_words = []
 
-with open('translation.csv', mode='w', newline='') as translation_file:
+
+with open('translation.csv', encoding='UTF-8',mode='w', newline='') as translation_file:
     translation_writer = csv.writer(translation_file)
-    with open('input.txt', mode='r', newline='') as input:
+    with open('input.txt', encoding='UTF-8', mode='r', newline='') as input:
         for w in input:
                 try: 
                     stripped_line = w.strip()
@@ -77,16 +77,15 @@ with open('translation.csv', mode='w', newline='') as translation_file:
                     for l in all_translations_file:
                         if l.strip() == spanish_word.strip():
                             toWrite=False
-                if toWrite and spanish_word != None and translation != None:
-                    spanish_words.append(spanish_word)
+                if toWrite and spanish_word != None and translation != None:                   
                     translation_writer.writerow([translation,spanish_word])
+                    with open('all_translations.txt', encoding='UTF-8', mode='a', newline='') as all_translations_file:
+                         all_translations_file.write('\n'+spanish_word)
                     print(spanish_word)
                     print(translation)
                     print("")
                 else: print("already translated")
-with open('all_translations.txt', mode='a', newline='') as all_translations_file:
-    for s in spanish_words:
-        all_translations_file.write(s+'\n')
+
 
 print("Translation finished")
 
